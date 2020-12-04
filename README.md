@@ -124,7 +124,7 @@ After that, you will get final segmentation result (**./mmdetection/0856610.segm
 ## Make Submission
 1. rename the 0856610.segm.json as 0856610.json
 
-2. Submit **0856610.json** to [here](https://drive.google.com/drive/folders/1VhuHvCyz2CH4yzDreyVTwhZiOFbQB09B).
+2. submit **0856610.json** to [here](https://drive.google.com/drive/folders/1VhuHvCyz2CH4yzDreyVTwhZiOFbQB09B).
 
 **Note**: The repo has provided **mAP_0.38246_0856610.json** which is my submission of predicted segmentation result with **0.38246 mAP**.
 
