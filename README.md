@@ -37,8 +37,8 @@ conda activate open-mmlab
 
 conda install pytorch==1.6.0 torchvision==0.7.0 cudatoolkit=10.1 -c pytorch -y
 
-# install the latest mmcv
-pip install mmcv-full==latest+torch1.6.0+cu101 -f https://download.openmmlab.com/mmcv/dist/index.html
+# install the mmcv
+pip install mmcv-full
 
 # install mmdetection
 git clone https://github.com/otesoo11781/Visual_Recognition_HW3.git
