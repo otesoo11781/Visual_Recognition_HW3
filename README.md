@@ -88,9 +88,9 @@ Hence, the weights directory is structured as:
 ```
 
 ### Retrain the ImageNet pretrained model on the given dataset (optional)
-p.s. If you don't want to spend a half day training a model, you can skip this step and just use the **latest.pth** I provided to inference. 
+P.S. If you don't want to spend a half day training a model, you can skip this step and just use the **latest.pth** I provided to inference. 
 
-Now, let's transfer train the Cascade Mask RCNN + ResNeSt on tiny PASCAL VOC dataset:
+Now, let's transferly train the Cascade Mask RCNN + ResNeSt on tiny PASCAL VOC dataset:
 
 1. please ensure ./mmdetection/configs/myconfigs/cascade_mask_rcnn_resnest.py exists.
 
