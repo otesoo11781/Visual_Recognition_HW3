@@ -78,6 +78,7 @@ Hence, the data directory is structured as:
 - **latest.pth**: my weights trained on tiny PASCAL VOC dataset (provided by TAs) with 24 epochs. 
 
 Then, move **latest.pth** to the **./mmdetection/work_dirs/cascade_mask_rcnn_resnest/** directory.
+
 Hence, the weights directory is structured as:
 ```
 ./mmdetection/
@@ -96,9 +97,11 @@ Now, let's transfer train the Cascade Mask RCNN + ResNeSt on tiny PASCAL VOC dat
 2. please check your current directory is ./mmdetection.
 
 3. run the following training command (the last argument "2" means the number of gpus):
+
 ```
 bash ./tools/dist_train.sh configs/myconfigs/cascade_mask_rcnn_resnest.py 2
 ```
+
 It takes about 13 hours to train the model on 2 RTX 2080 GPUs.
 
 Finally, we can find the final weights **latest.pth** in **./mmdetection/work_dirs/cascade_mask_rcnn_resnest/** directory.
