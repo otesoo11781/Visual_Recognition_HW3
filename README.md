@@ -56,101 +56,73 @@ Besides, You can install mmdetection by the orignal repo [mmdetection](https://g
 If there is any problem about installation, please refer to the original repo of [mmdetection](https://github.com/open-mmlab/mmdetection).
 
 ## Dataset Preparation
-Download the dataset from the [Google drive](https://drive.google.com/drive/u/1/folders/1Ob5oT9Lcmz7g5mVOcYH3QugA7tV3WsSl) which is provided by TAs
+Download the dataset from the [Google drive](https://drive.google.com/drive/folders/1fGg03EdBAxjFumGHHNhMrz2sMLLH04FK) which is provided by TAs.
 
-Then, unzip them and put it under the **./darknet/DigitDetection/dataset/** directory
+Then, unzip them and put it under the **mmdetetction/data/** directory.
 
 Hence, the data directory is structured as:
 ```
-./darknet/
-  +- DigitDetection/
-  |  +- dataset/
-     |  +- train/
-          |  +- 1.jpg ...
-          |  +- digitStruct.mat
-     |  +- test/
-          |  +- 1.jpg ...
-     |  construct_datasets.py    
+./mmdetection/
+  +- data/
+  |  +- train_images/
+     |  +- 2007_000042.jpg ...
+  |  +- test_images/
+     |  +- 2007_000629.jpg ...
+  |  +- pascal_train.json
+  |  +- test.json
 ```
-
-Next, process the annotation file (digitStruct.mat) into yolov4 format by running:
-```
-cd DigitDetection/dataset/
-python construct_datasets.py
-cd ../../
-```
-After that, you will get a txt file, which contains the corresponding bounding boxes, for each training image in train/ directory.
-
-**Important: you can download the processed dataset from [dataset.zip](https://drive.google.com/file/d/1dlNmVJmfG9Df9z21hZwKe9hR_h-dPhuG/view?usp=sharing)**
 
 ## Transfer Training
-**Important: Download the required pretrained weights and transfer trained weights by [weights.zip](https://drive.google.com/file/d/16GZVXv3TJ7jCptoKbXecIS2hxq25dr3H/view?usp=sharing)**
+**Important: This step is optional. If you don't want to retrain the ImageNet pretrained model, please download [my trained weights](https://drive.google.com/file/d/1UOZ7AEisLbKZkZhwHsd8rVqxsKE9J13x/view?usp=sharing).**
 
-- **yolov4.conv.137**: pretrained on MS COCO dataset
-- **yolov4-HN_best.weights**: best weights trained on SVHN dataset in 20,000 iterations.
-- **yolov4-HN_final.weights**: fianl weights trained on SVHN dataset in 20,000 iterations. 
+- **latest.pth**: my weights trained on tiny PASCAL VOC dataset (provided by TAs) with 24 epochs. 
 
-Move all the weights to the **./darknet/DigitDetection/weights/** directory.
+Then, move **latest.pth** to the **./mmdetection/work_dirs/cascade_mask_rcnn_resnest/** directory.
 Hence, the weights directory is structured as:
 ```
-./darknet/
-  +- DigitDetection/
-  |  +- weights/
-     |  +- yolov4.conv.137
-     |  +- yolov4-HN_best.weights
-     |  +- yolov4-HN_final.weights
+./mmdetection/
+  +- work_dirs/
+  |  +- cascade_mask_rcnn_resnest/
+     |  +- latest.pth
 ```
 
-### Retrain the yolov4 model which is pretrained on MS COCO dataset (optional)
-If you don't want to spend 4 days training a model, you can skip this step and just use the **yolov4-HN_best.weights** I provided to inference. 
+### Retrain the ImageNet pretrained model on the given dataset (optional)
+p.s. If you don't want to spend a half day training a model, you can skip this step and just use the **latest.pth** I provided to inference. 
 
-Now, let's transfer train the yolov4.conv.137 on SVHN dataset:
+Now, let's transfer train the Cascade Mask RCNN + ResNeSt on tiny PASCAL VOC dataset:
 
-1. please ensure there is MS COCO pretrained Yolov4 model (i.e. yolov4.conv.137).
+1. please ensure ./mmdetection/configs/myconfigs/cascade_mask_rcnn_resnest.py exists.
 
-2. modify ./DigitDetection/cfg/yolov4-HN.cfg file to training mode:
+2. please check your current directory is ./mmdetection.
+
+3. run the following training command (the last argument "2" means the number of gpus):
 ```
-# Training
-batch=64
-subdivisions=64
+bash ./tools/dist_train.sh configs/myconfigs/cascade_mask_rcnn_resnest.py 2
 ```
+It takes about 13 hours to train the model on 2 RTX 2080 GPUs.
 
-3. run the following command:
-```
-./darknet detector train ./DigitDetection/cfg/HN.data ./DigitDetection/cfg/yolov4-HN.cfg ./DigitDetection/weights/yolov4.conv.137 -map -gpus 0,1
-```
-It takes about 3~4 days to train the model on 2 RTX 2080 GPUs.
-
-Finally, we can find the best weights **yolov4-HN_best.weights** in **./darknet/DigitDetection/weights/** directory.
+Finally, we can find the final weights **latest.pth** in **./mmdetection/work_dirs/cascade_mask_rcnn_resnest/** directory.
 
 
 ## Inference
-With the testing dataset and trained model, you can run the following commands to obtain the prediction results:
+With the testing dataset and trained model, you can run the following commands to obtain the predicted results:
 
-1. modify ./DigitDetection/cfg/yolov4-HN.cfg file to testing mode:
+1. please check your current directory is ./mmdetection.
+
+2. run the testing bash script (the third argument "2" means the number of gpus):
+
 ```
-# Testing
-batch=1
-subdivisions=1
-```
-2. run yolov4 detector:
-```
-./darknet detector test ./DigitDetection/cfg/HN.data ./DigitDetection/cfg/yolov4-HN.cfg ./DigitDetection/weights/yolov4-HN_best.weights -thresh 0.005 -dont_show -out ./DigitDetection/result.json < ./DigitDetection/cfg/test.txt
+./tools/dist_test.sh configs/myconfigs/cascade_mask_rcnn_resnest.py ./work_dirs/cascade_mask_rcnn_resnest/latest.pth 2 --format-only --options "jsonfile_prefix=./0856610"
 ```
 
-After that, you will get detection results (**./DigitDetection/result.json**).
+After that, you will get final segmentation result (**./mmdetection/0856610.segm.json**).
 
-**Note**: You can test my model on [Colab notebook](https://colab.research.google.com/drive/1cdcXTFOS86gu9-ziz4vtU19kIUxt_AtG?usp=sharing). It will show a inference speed of **24.538 fps**.
-
-**Note**: The repo has provided **result.json** which is inferred on Colab.
 
 ## Make Submission
-1. Transform result.json into submission format by:
-```
-python ./DigitDetection/parse_result.py --input ./DigitDetection/result.json --output ./DigitDetection/0856610.json
-```
-2. Submit transformed **0856610.json** to [here](https://drive.google.com/drive/folders/1QNW9YvzFM7Nmg0PqUqbjgqpFyoo1wBEu).
+1. rename the 0856610.segm.json as 0856610.json
 
-**Note**: the repo has provided **0856610.json** which is corresponding to my submission with **mAP 0.49137**. 
+2. Submit **0856610.json** to [here](https://drive.google.com/drive/folders/1VhuHvCyz2CH4yzDreyVTwhZiOFbQB09B).
+
+**Note**: The repo has provided **mAP_0.38246_0856610.json** which is my submission of predicted segmentation result with **0.38246 mAP**.
 
 
